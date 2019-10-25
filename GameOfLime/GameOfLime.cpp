@@ -200,4 +200,5 @@ TODO:
 * Save/Load "creatures"
 * make cell class?
 * fix creep (spreads to left faster than right for some reason)
+* fix grid (bigger than you can see?)
 */
