@@ -38,7 +38,8 @@ public:
 
 	bool setCell(u_int x, u_int y, EState value)
 	{
-		if (x >= width || x <= 0 || y >= height || y <= 0)
+		if (x >= width || x < 0 || y >= height || y < 0)
+			//std::cout << "Set cell out of range x:" << x << " y:" << y << "\n";
 			return false;
 		grid[x][y] = value;
 		return true;
@@ -46,8 +47,11 @@ public:
 
 	EState getCell(u_int x, u_int y)
 	{
-		if (x >= width || x <= 0 || y >= height || y <= 0)
+		if (x >= width || x < 0 || y >= height || y < 0)
+		{
+			//std::cout << "Get cell out of range x:" << x << " y:" << y << "\n";
 			return EState::DEAD;
+		}
 		return grid[x][y];
 	}
 
