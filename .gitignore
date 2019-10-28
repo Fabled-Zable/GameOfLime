@@ -338,3 +338,5 @@ ASALocalRun/
 
 # BeatPulse healthcheck temp database
 healthchecksdb
+GameOfLime/GameOfLime.vcxproj
+GameOfLime/GameOfLime.vcxproj.filters
