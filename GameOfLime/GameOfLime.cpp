@@ -41,12 +41,6 @@ public:
 	GameState GameState;
 
 public:
-	bool OnUserCreate() override
-	{
-		GameState = GameState::START;
-		grid = GOL(ScreenWidth() / gridPixelSize, ScreenHeight() / gridPixelSize - 10);
-		return true;
-	}
 
 	void DrawLife(u_int x, u_int y)
 	{
@@ -86,6 +80,25 @@ public:
 			}
 	}
 
+	std::vector<Button*> infoBoxes;
+
+	bool OnUserCreate() override
+	{
+		GameState = GameState::START;
+		grid = GOL(ScreenWidth() / gridPixelSize, ScreenHeight() / gridPixelSize - 10);
+
+		std::vector<std::string> infos = {"m1     step", "space steps", "e     erase","esc   genocide","m     menu","m2    gol","c     creep1","x     creep2","w     wall","r     root"};
+
+		for (u_int i = 0; i < infos.size(); i++)
+		{
+			Button* button = new Button(this, infos[i], 2, 20, 20 * (i + 1) + (i * 50), 225, 50, olc::YELLOW, olc::GREY, olc::DARK_GREEN);
+			button->borderThickness = 3;
+			infoBoxes.push_back(button);
+		}
+
+		return true;
+	}
+
 	bool OnUserUpdate(float fElapsedTime) override
 	{
 		if(fps != Fps::UNCAPPED)
@@ -95,12 +108,18 @@ public:
 		{
 		case GameState::START:
 			fps = PARTIAL;
-			DrawString(0, 0, "m1    step\nspace steps\ne     erase\nesc   genocide\nm     menu\nm2    gol\nc     creep1\nx     creep2\nw     wall\nr     root\nspace start", olc::GREEN,5);
+
+			for (u_int i = 0; i < infoBoxes.size(); i++)
+			{
+				infoBoxes[i]->Render();
+			}
+
+			/*DrawString(0, 0, "\n\n\n\n\n\n\n\n\n\nspace start", olc::GREEN,5);
 			if (GetKey(olc::SPACE).bReleased == true)
 			{
 				FillRect(0, 0, ScreenWidth(), ScreenHeight(), olc::BLACK);
 				GameState = GameState::RUNNING;
-			}
+			}*/
 			return true;
 			break;
 
