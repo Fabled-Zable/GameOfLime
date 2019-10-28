@@ -173,9 +173,9 @@ public:
 
 		Box::Render();
 
-		int drawX = x + width / 2 - (int)(charSize / 2 * text.length());
+		int drawX = x + width / 2 - (int)(charSize / 2 * text.length() * scale);
 		int drawY = y + height / 2 - (charSize * scale) / 2;
 
-		engine->DrawString(drawX, drawY, text, textColor);
+		engine->DrawString(drawX, drawY, text, textColor,scale);
 	}
 };
