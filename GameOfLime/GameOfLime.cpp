@@ -88,11 +88,11 @@ public:
 		GameState = GameState::START;
 		grid = GOL(ScreenWidth() / gridPixelSize, ScreenHeight() / gridPixelSize - 10);
 
-		std::vector<std::string> infos = {"m1     step", "space steps", "e     erase","esc   genocide","m     menu","m2    gol","c     creep1","x     creep2","w     wall","r     root"};
+		std::vector<std::string> infos = { " M1        STEP", " SPACE    STEPS", " E        ERASE"," ESC   GENOCIDE"," M         MENU"," M2         GOL"," C       CREEP1"," X       CREEP2"," W         WALL"," R         ROOT"};
 
 		for (u_int i = 0; i < infos.size(); i++)
 		{
-			Button* button = new Button(this, infos[i], 2, 20, 20 * (i + 1) + (i * 50), 225, 50, olc::YELLOW, olc::GREY, olc::DARK_GREEN);
+			Button* button = new Button(this, infos[i], 2, 20, 20 * (i + 1) + (i * 50), 250, 50, olc::YELLOW, olc::GREY, olc::BLACK);
 			button->borderThickness = 3;
 			button->XCenter = false;
 			infoBoxes.push_back(button);
@@ -102,6 +102,7 @@ public:
 		startButton->heldBackgroundColor = olc::DARK_GREEN;
 		startButton->heldForegroundColor = olc::DARK_GREY;
 		startButton->onHoverTextColor = olc::WHITE;
+		startButton->borderThickness = 5;
 		startButton->onPress = [this](int mouse) -> void {
 			GameState = GameState::RUNNING; 
 			FillRect(0, 0, ScreenWidth(), ScreenHeight(), olc::BLACK); 
