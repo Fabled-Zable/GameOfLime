@@ -45,6 +45,16 @@ public:
 		return true;
 	}
 
+	void randomFill()
+	{
+		for(int x = 0; x < grid.size(); x++)
+			for (int y = 0; y < grid[x].size(); y++)
+			{
+				if (rand() % 5 == 0)
+					grid[x][y] = EState::ALIVE;
+			}
+	}
+
 	EState getCell(u_int x, u_int y)
 	{
 		if (x >= width || x < 0 || y >= height || y < 0)

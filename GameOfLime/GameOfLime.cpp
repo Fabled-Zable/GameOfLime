@@ -87,6 +87,7 @@ public:
 	{
 		GameState = GameState::START;
 		grid = GOL(ScreenWidth() / gridPixelSize, ScreenHeight() / gridPixelSize - 10);
+		grid.randomFill();
 
 		std::vector<std::string> infos = { " M1        STEP", " SPACE    STEPS", " E        ERASE"," ESC   GENOCIDE"," M         MENU"," M2         GOL"," C       CREEP1"," X       CREEP2"," W         WALL"," R         ROOT"};
 
