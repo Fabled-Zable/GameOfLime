@@ -94,7 +94,7 @@ public:
 	olc::Pixel defaultForeGroundColor, defaultBackGroundColor;
 	olc::Pixel currentForeGroundColor, currentBackGroundColor;
 
-	olc::Pixel heldForeGroundColor, heldBackgroundColor;
+	olc::Pixel heldForegroundColor, heldBackgroundColor;
 
 	olc::Pixel hoverForeGroundColor, hoverBackgroundColor;
 
@@ -113,7 +113,7 @@ public:
 		this->currentForeGroundColor = foreGroundColor;
 		this->currentBackGroundColor = backGroundColor;
 
-		this->heldForeGroundColor = foreGroundColor;
+		this->heldForegroundColor = foreGroundColor;
 		this->heldBackgroundColor = backGroundColor;
 
 		this->hoverForeGroundColor = foreGroundColor;
@@ -128,7 +128,7 @@ public:
 	void _OnHeld(int mouse) override
 	{
 		currentBackGroundColor = heldBackgroundColor;
-		currentForeGroundColor = heldForeGroundColor;
+		currentForeGroundColor = heldForegroundColor;
 	}
 
 	void _OnHover() override
@@ -154,17 +154,26 @@ public:
 class Button : public Box
 {
 public:
-	olc::Pixel textColor;
+	olc::Pixel defaultTextColor;
+	olc::Pixel currentTextColor;
+	olc::Pixel onHoverTextColor;
 	std::string text;
 	int scale;
-	bool center = true;
+	bool XCenter = true;
+	bool YCenter = true;
 
-	Button(olc::PixelGameEngine* engine, std::string text,int scale = 1, int x = 0, int y = 0, int width = 0, int height = 0, olc::Pixel textColor = olc::WHITE, olc::Pixel foreGroundColor = olc::WHITE, olc::Pixel backGroundColor = olc::BLACK)
+	Button(olc::PixelGameEngine* engine, std::string text,int scale = 1, int x = 0, int y = 0, int width = 0, int height = 0, olc::Pixel defaultTextColor = olc::WHITE, olc::Pixel foreGroundColor = olc::WHITE, olc::Pixel backGroundColor = olc::BLACK)
 		: Box(engine, x, y, width, height, foreGroundColor, backGroundColor)
 	{
 		this->text = text;
 		this->scale = scale;
-		this->textColor = textColor;
+		this->defaultTextColor = defaultTextColor;
+		this->onHoverTextColor = defaultTextColor;
+	}
+
+	void _OnHover() override
+	{
+		currentTextColor = onHoverTextColor;
 	}
 
 	void Render() override
@@ -173,9 +182,15 @@ public:
 
 		Box::Render();
 
-		int drawX = x + width / 2 - (int)(charSize / 2 * text.length() * scale);
-		int drawY = y + height / 2 - (charSize * scale) / 2;
+		int drawX = x;
+		if(XCenter)
+			drawX = x + width / 2 - (int)(charSize / 2 * text.length() * scale);
+		int drawY = y;
+		if (YCenter)
+			drawY = y + height / 2 - (charSize * scale) / 2;
 
-		engine->DrawString(drawX, drawY, text, textColor,scale);
+		engine->DrawString(drawX, drawY, text, currentTextColor,scale);
+
+		currentTextColor = defaultTextColor;
 	}
 };
