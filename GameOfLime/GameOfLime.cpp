@@ -115,6 +115,8 @@ public:
 	u_int ticks = 0;
 	bool OnUserUpdate(float fElapsedTime) override
 	{
+		sAppName = "Game Of Lime - FPS " + std::to_string(nFrameCount) + " : " + std::to_string(fps);
+
 		if(fps != Fps::UNCAPPED)
 			std::this_thread::sleep_for(std::chrono::milliseconds((int)((1000.0f / fps) - fElapsedTime)));// don't melt cpu
 

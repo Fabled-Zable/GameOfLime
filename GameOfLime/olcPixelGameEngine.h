@@ -507,6 +507,7 @@ namespace olc // All OneLoneCoder stuff will now exist in the "olc" namespace
 		void SetScreenSize(int w, int h);
 
 	public: // Branding
+		int	nFrameCount = 0;
 		std::string sAppName;
 
 	private: // Inner mysterious workings
@@ -539,7 +540,6 @@ namespace olc // All OneLoneCoder stuff will now exist in the "olc" namespace
 		bool		bHasMouseFocus = false;
 		bool		bEnableVSYNC = false;
 		float		fFrameTimer = 1.0f;
-		int			nFrameCount = 0;
 		Sprite* fontSprite = nullptr;
 		std::function<olc::Pixel(const int x, const int y, const olc::Pixel&, const olc::Pixel&)> funcPixelMode;
 
@@ -1979,7 +1979,7 @@ namespace olc
 				{
 					fFrameTimer -= 1.0f;
 
-					std::string sTitle = sAppName + " - OneLoneCoder.com - Pixel Game Engine" + " - FPS: " + std::to_string(nFrameCount);
+					std::string sTitle = sAppName + " - OneLoneCoder.com - Pixel Game Engine";
 #if defined(_WIN32)
 #ifdef UNICODE
 					SetWindowText(olc_hWnd, ConvertS2W(sTitle).c_str());
