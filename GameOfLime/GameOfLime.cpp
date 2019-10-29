@@ -81,6 +81,7 @@ public:
 	}
 
 	std::vector<Button*> infoBoxes;
+	Button* startButton;
 
 	bool OnUserCreate() override
 	{
@@ -93,16 +94,29 @@ public:
 		{
 			Button* button = new Button(this, infos[i], 2, 20, 20 * (i + 1) + (i * 50), 225, 50, olc::YELLOW, olc::GREY, olc::DARK_GREEN);
 			button->borderThickness = 3;
+			button->XCenter = false;
 			infoBoxes.push_back(button);
 		}
 
+		startButton = new Button(this,"START!",4,ScreenWidth()/2,ScreenHeight()/2, 6 * 8 * 4 + 20, 64, olc::YELLOW,olc::GREY,olc::GREEN);
+		startButton->heldBackgroundColor = olc::DARK_GREEN;
+		startButton->heldForegroundColor = olc::DARK_GREY;
+		startButton->onHoverTextColor = olc::WHITE;
+		startButton->onPress = [this](int mouse) -> void {
+			GameState = GameState::RUNNING; 
+			FillRect(0, 0, ScreenWidth(), ScreenHeight(), olc::BLACK); 
+			DrawAllLife();
+		};
+
 		return true;
 	}
-
+	u_int ticks = 0;
 	bool OnUserUpdate(float fElapsedTime) override
 	{
 		if(fps != Fps::UNCAPPED)
 			std::this_thread::sleep_for(std::chrono::milliseconds((int)((1000.0f / fps) - fElapsedTime)));// don't melt cpu
+
+		ticks++;
 
 		switch (GameState)
 		{
@@ -113,6 +127,10 @@ public:
 			{
 				infoBoxes[i]->Render();
 			}
+			startButton->defaultBackGroundColor.g = range_lerp(sin(ticks),-1,1,127,200);
+			startButton->hoverBackgroundColor = startButton->defaultBackGroundColor;
+			startButton->Poll();
+			startButton->Render();
 
 			/*DrawString(0, 0, "\n\n\n\n\n\n\n\n\n\nspace start", olc::GREEN,5);
 			if (GetKey(olc::SPACE).bReleased == true)
@@ -140,8 +158,8 @@ public:
 			FillRect(mouseGridPosX*gridPixelSize,mouseGridPosY*gridPixelSize,gridPixelSize,gridPixelSize, olc::GREY);
 			if (GetMouse(0).bPressed || GetKey(olc::SPACE).bHeld)
 			{
-				grid.step([this](u_int x, u_int y) -> void {DrawLife(x, y); });
-				//DrawAllLife();
+				if(ticks%5 == 0 || GetMouse(0).bPressed)
+					grid.step([this](u_int x, u_int y) -> void {DrawLife(x, y); });
 			}
 			if (GetMouse(1).bHeld)
 			{
