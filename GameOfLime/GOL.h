@@ -45,10 +45,37 @@ public:
 		return true;
 	}
 
+	void shift(int shift_x, int shift_y)
+	{
+		std::vector< std::vector< EState > > newGrid;
+		newGrid.resize(grid.size());
+		for (unsigned int x = 0; x < grid.size(); x++)
+		{
+			newGrid[x].resize(grid[x].size());;
+			for (unsigned int y = 0; y < grid[x].size(); y++)
+			{
+				newGrid[x][y] = grid[x][y];
+			}
+		}
+		
+		for(u_int x = 0; x < grid.size(); x++)
+			for (u_int y = 0; y < grid[x].size(); y++)
+			{
+				int newX = x + shift_x;
+				int newY = y + shift_y;
+				if (newX >= 0 && newX < grid.size() && newY >= 0 && newY < grid[x].size())
+				{
+					newGrid[newX][newY] = grid[x][y];
+				}
+			}
+
+		grid = newGrid;
+	}
+
 	void randomFill()
 	{
-		for(int x = 0; x < grid.size(); x++)
-			for (int y = 0; y < grid[x].size(); y++)
+		for(u_int x = 0; x < grid.size(); x++)
+			for (u_int y = 0; y < grid[x].size(); y++)
 			{
 				if (rand() % 5 == 0)
 					grid[x][y] = EState::ALIVE;

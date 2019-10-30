@@ -44,31 +44,30 @@ public:
 
 	void DrawLife(u_int x, u_int y)
 	{
+		olc::Pixel color;
 		switch (grid.getCell(x, y))
 		{
 		case GOL::EState::ALIVE:
-			FillRect(x*gridPixelSize, y*gridPixelSize,gridPixelSize,gridPixelSize, olc::GREEN);
-
+			color = olc::GREEN;
 			break;
-
 		case GOL::EState::DEAD:
-			FillRect(x * gridPixelSize, y * gridPixelSize, gridPixelSize, gridPixelSize, olc::BLACK);
+			color = olc::BLACK;
 			break;
-
 		case GOL::EState::WALL:
-			FillRect(x * gridPixelSize, y * gridPixelSize, gridPixelSize, gridPixelSize, olc::WHITE);
+			color = olc::WHITE;
 			break;
-
 		case GOL::EState::ROOT:
-			FillRect(x * gridPixelSize, y * gridPixelSize, gridPixelSize, gridPixelSize, olc::DARK_GREEN);
+			color = olc::DARK_GREEN;
 			break;
 		case GOL::EState::CREEP_ONE:
-			FillRect(x * gridPixelSize, y * gridPixelSize, gridPixelSize, gridPixelSize, olc::DARK_RED);
+			color = olc::DARK_RED;
 			break;
 		case GOL::EState::CREEP_TWO:
-			FillRect(x * gridPixelSize, y * gridPixelSize, gridPixelSize, gridPixelSize, olc::DARK_BLUE);
+			color = olc::DARK_BLUE;
 			break;
 		}
+
+		FillRect(x * gridPixelSize, y * gridPixelSize, gridPixelSize, gridPixelSize, color);
 	}
 
 	void DrawAllLife()
@@ -81,6 +80,7 @@ public:
 	}
 
 	std::vector<Button*> infoBoxes;
+	std::vector<Button*> inGameGui;
 	Button* startButton;
 
 	bool OnUserCreate() override
@@ -89,21 +89,36 @@ public:
 		grid = GOL(ScreenWidth() / gridPixelSize, ScreenHeight() / gridPixelSize - 10);
 		grid.randomFill();
 
-		std::vector<std::string> infos = { " M1        STEP", " SPACE    STEPS", " E        ERASE"," ESC   GENOCIDE"," M         MENU"," M2         GOL"," C       CREEP1"," X       CREEP2"," W         WALL"," R         ROOT"};
+		std::vector<std::string> infos = { " M1        STEP", " SPACE    STEPS", " E        ERASE"," ESC   GENOCIDE"," H         HELP"," M2         GOL"," C       CREEP1"," X       CREEP2"," W         WALL"," R         ROOT"};
+
+		ButtonStyle infoBoxStyle;
+		infoBoxStyle.boxStyle.borderThickness = 3;
+		infoBoxStyle.XCenter = false;
+		infoBoxStyle.textScale = 2;
+		infoBoxStyle.boxStyle.borderThickness = 3;
+		infoBoxStyle.defaultTextColor = olc::YELLOW;
+		infoBoxStyle.boxStyle.defaultForeGroundColor = olc::GREY;
+		infoBoxStyle.boxStyle.defaultBackGroundColor = olc::BLACK;
+
 
 		for (u_int i = 0; i < infos.size(); i++)
 		{
-			Button* button = new Button(this, infos[i], 2, 20, 20 * (i + 1) + (i * 50), 250, 50, olc::YELLOW, olc::GREY, olc::BLACK);
-			button->borderThickness = 3;
-			button->XCenter = false;
+			Button* button = new Button(this, infoBoxStyle, infos[i], 20, 20 * (i + 1) + (i * 50), 250, 50);// , olc::YELLOW, olc::GREY, olc::BLACK);
 			infoBoxes.push_back(button);
 		}
 
-		startButton = new Button(this,"START!",4,ScreenWidth()/2,ScreenHeight()/2, 6 * 8 * 4 + 20, 64, olc::YELLOW,olc::GREY,olc::GREEN);
-		startButton->heldBackgroundColor = olc::DARK_GREEN;
-		startButton->heldForegroundColor = olc::DARK_GREY;
-		startButton->onHoverTextColor = olc::WHITE;
-		startButton->borderThickness = 5;
+		ButtonStyle startButtonStyle;
+		startButtonStyle.boxStyle.heldBackgroundColor = olc::DARK_GREEN;
+		startButtonStyle.boxStyle.heldForegroundColor = olc::DARK_GREY;
+		startButtonStyle.boxStyle.borderThickness = 5;
+		startButtonStyle.boxStyle.defaultForeGroundColor = olc::GREY;
+		startButtonStyle.boxStyle.defaultBackGroundColor = olc::GREEN;
+		startButtonStyle.defaultTextColor = olc::YELLOW;
+		startButtonStyle.hoverTextColor = olc::WHITE;
+		startButtonStyle.textScale = 4;
+
+		startButton = new Button(this,startButtonStyle,"START!",ScreenWidth()/2,ScreenHeight()/2, 6 * 8 * 4 + 20, 64);
+		startButton->boxStyle.borderThickness = 5;
 		startButton->onPress = [this](int mouse) -> void {
 			GameState = GameState::RUNNING; 
 			FillRect(0, 0, ScreenWidth(), ScreenHeight(), olc::BLACK); 
@@ -131,17 +146,11 @@ public:
 			{
 				infoBoxes[i]->Render();
 			}
-			startButton->defaultBackGroundColor.g = range_lerp(sin(ticks),-1,1,127,200);
-			startButton->hoverBackgroundColor = startButton->defaultBackGroundColor;
+			startButton->boxStyle.defaultBackGroundColor.g = (uint8_t)range_lerp(sin(ticks),-1,1,127,200);
+			startButton->boxStyle.hoverBackgroundColor = startButton->boxStyle.defaultBackGroundColor;
 			startButton->Poll();
 			startButton->Render();
 
-			/*DrawString(0, 0, "\n\n\n\n\n\n\n\n\n\nspace start", olc::GREEN,5);
-			if (GetKey(olc::SPACE).bReleased == true)
-			{
-				FillRect(0, 0, ScreenWidth(), ScreenHeight(), olc::BLACK);
-				GameState = GameState::RUNNING;
-			}*/
 			return true;
 			break;
 
@@ -170,6 +179,13 @@ public:
 				grid.setCell(mouseGridPosX, mouseGridPosY, GOL::EState::ALIVE);
 				DrawAllLife();
 
+			}
+			if (GetKey(olc::H).bReleased)
+			{
+				SetPixelMode(olc::Pixel::Mode::ALPHA);
+				FillRect(0, 0, ScreenWidth(), ScreenHeight(), olc::Pixel(32,64,32,127));
+				GameState = GameState::START;
+				SetPixelMode(olc::Pixel::Mode::NORMAL);
 			}
 			if (GetKey(olc::W).bHeld)
 			{
@@ -211,6 +227,27 @@ public:
 				DrawAllLife();
 			}
 
+			if (GetKey(olc::UP).bHeld)
+			{
+				grid.shift(0, -1);
+				DrawAllLife();
+			}
+			if (GetKey(olc::DOWN).bHeld)
+			{
+				grid.shift(0, 1);
+				DrawAllLife();
+			}
+			if (GetKey(olc::LEFT).bHeld)
+			{
+				grid.shift(-1, 0);
+				DrawAllLife();
+			}
+			if (GetKey(olc::RIGHT).bHeld)
+			{
+				grid.shift(1, 0);
+				DrawAllLife();
+			}
+
 			for (int i = 0; i < ScreenWidth(); i += gridPixelSize)
 			{
 				DrawLine(i, 0, i, ScreenHeight() - (10 * gridPixelSize), olc::VERY_DARK_GREY);
@@ -241,9 +278,9 @@ public:
 	bool OnUserCreate() override
 	{
 		button = new Button(this,"Hello World!",1,ScreenWidth()/2 - 100,ScreenHeight()/2-100,200,100,olc::WHITE,olc::WHITE,olc::DARK_GREEN);
-		button->hoverBackgroundColor = olc::BLUE;
-		button->heldBackgroundColor = olc::DARK_BLUE;
-		button->borderThickness = 1;
+		button->boxStyle.hoverBackgroundColor = olc::BLUE;
+		button->boxStyle.heldBackgroundColor = olc::DARK_BLUE;
+		button->boxStyle.borderThickness = 1;
 
 		return true;
 

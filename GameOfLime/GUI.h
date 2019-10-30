@@ -1,6 +1,29 @@
 //#define OLC_PGE_APPLICATION
 #include "olcPixelGameEngine.h"
 
+
+struct BoxStyle
+{
+	olc::Pixel defaultForeGroundColor, defaultBackGroundColor;
+	olc::Pixel currentForeGroundColor, currentBackGroundColor;
+	olc::Pixel heldForegroundColor, heldBackgroundColor;
+	olc::Pixel hoverForeGroundColor, hoverBackgroundColor;
+	bool fill = true;
+	bool border = true;
+	int borderThickness = 1;
+};
+
+struct ButtonStyle
+{
+	BoxStyle boxStyle;
+	olc::Pixel defaultTextColor;
+	olc::Pixel currentTextColor;
+	olc::Pixel hoverTextColor;
+	int textScale = 1;
+	bool XCenter = true;
+	bool YCenter = true;
+};
+
 class Element
 {
 private:
@@ -91,35 +114,43 @@ public:
 class Box : public Element
 {
 public:
-	olc::Pixel defaultForeGroundColor, defaultBackGroundColor;
-	olc::Pixel currentForeGroundColor, currentBackGroundColor;
+	//olc::Pixel defaultForeGroundColor, defaultBackGroundColor;
+	//olc::Pixel currentForeGroundColor, currentBackGroundColor;
 
-	olc::Pixel heldForegroundColor, heldBackgroundColor;
+	//olc::Pixel heldForegroundColor, heldBackgroundColor;
 
-	olc::Pixel hoverForeGroundColor, hoverBackgroundColor;
+	//olc::Pixel hoverForeGroundColor, hoverBackgroundColor;
 
-	bool fill = true;
-	bool border = true;
+	//bool fill = true;
+	//bool border = true;
 
-	int borderThickness = 1;
+	//int borderThickness = 1;
+
+	BoxStyle boxStyle;
 
 
 	Box(olc::PixelGameEngine* engine, int x = 0, int y = 0, int width = 0, int height = 0, olc::Pixel foreGroundColor = olc::WHITE, olc::Pixel backGroundColor = olc::BLACK)
 		: Element(engine, x ,y, width, height)
 	{
-		this->defaultForeGroundColor = foreGroundColor;
-		this->defaultBackGroundColor = backGroundColor;
+		this->boxStyle.defaultForeGroundColor = foreGroundColor;
+		this->boxStyle.defaultBackGroundColor = backGroundColor;
 
-		this->currentForeGroundColor = foreGroundColor;
-		this->currentBackGroundColor = backGroundColor;
+		this->boxStyle.currentForeGroundColor = foreGroundColor;
+		this->boxStyle.currentBackGroundColor = backGroundColor;
 
-		this->heldForegroundColor = foreGroundColor;
-		this->heldBackgroundColor = backGroundColor;
+		this->boxStyle.heldForegroundColor = foreGroundColor;
+		this->boxStyle.heldBackgroundColor = backGroundColor;
 
-		this->hoverForeGroundColor = foreGroundColor;
-		this->hoverBackgroundColor = backGroundColor;
+		this->boxStyle.hoverForeGroundColor = foreGroundColor;
+		this->boxStyle.hoverBackgroundColor = backGroundColor;
 
 
+	}
+
+	Box(olc::PixelGameEngine* engine, BoxStyle boxStyle, int x = 0, int y = 0, int width = 0, int height = 0)
+		: Element(engine, x, y, width, height)
+	{
+		this->boxStyle = boxStyle;
 	}
 
 	void _OnPress(int mouse) override {}
@@ -127,53 +158,56 @@ public:
 
 	void _OnHeld(int mouse) override
 	{
-		currentBackGroundColor = heldBackgroundColor;
-		currentForeGroundColor = heldForegroundColor;
+		boxStyle.currentBackGroundColor = boxStyle.heldBackgroundColor;
+		boxStyle.currentForeGroundColor = boxStyle.heldForegroundColor;
 	}
 
 	void _OnHover() override
 	{
-		currentBackGroundColor = hoverBackgroundColor;
-		currentForeGroundColor = hoverForeGroundColor;
+		boxStyle.currentBackGroundColor = boxStyle.hoverBackgroundColor;
+		boxStyle.currentForeGroundColor = boxStyle.hoverForeGroundColor;
 	}
 
 	virtual void Render()
 	{ 
-		if(fill)
-			engine->FillRect(x, y, width, height, currentBackGroundColor);
+		if(boxStyle.fill)
+			engine->FillRect(x, y, width, height, boxStyle.currentBackGroundColor);
 
-		if(border)
-			for (int i = borderThickness; i != 0; i += i < 0 ? 1 : -1)
-				engine->DrawRect(x - i + 1, y - i + 1, width + i*2 - 2, height, currentForeGroundColor);//trial and error ftw
+		if(boxStyle.border)
+			for (int i = boxStyle.borderThickness; i != 0; i += i < 0 ? 1 : -1)
+				engine->DrawRect(x - i + 1, y - i + 1, width + i*2 - 2, height, boxStyle.currentForeGroundColor);//trial and error ftw
 
-		currentBackGroundColor = defaultBackGroundColor;
-		currentForeGroundColor = defaultForeGroundColor;
+		boxStyle.currentBackGroundColor = boxStyle.defaultBackGroundColor;
+		boxStyle.currentForeGroundColor = boxStyle.defaultForeGroundColor;
 	}
 };
 
 class Button : public Box
 {
 public:
-	olc::Pixel defaultTextColor;
-	olc::Pixel currentTextColor;
-	olc::Pixel onHoverTextColor;
 	std::string text;
-	int scale;
-	bool XCenter = true;
-	bool YCenter = true;
+
+	ButtonStyle buttonStyle;
 
 	Button(olc::PixelGameEngine* engine, std::string text,int scale = 1, int x = 0, int y = 0, int width = 0, int height = 0, olc::Pixel defaultTextColor = olc::WHITE, olc::Pixel foreGroundColor = olc::WHITE, olc::Pixel backGroundColor = olc::BLACK)
 		: Box(engine, x, y, width, height, foreGroundColor, backGroundColor)
 	{
 		this->text = text;
-		this->scale = scale;
-		this->defaultTextColor = defaultTextColor;
-		this->onHoverTextColor = defaultTextColor;
+		this->buttonStyle.textScale = scale;
+		this->buttonStyle.defaultTextColor = defaultTextColor;
+		this->buttonStyle.hoverTextColor = defaultTextColor;
+	}
+
+	Button(olc::PixelGameEngine* engine, ButtonStyle buttonStyle, std::string text = "", int x = 0, int y = 0, int width = 0, int height = 0)
+		: Box(engine, buttonStyle.boxStyle, x, y, width, height)
+	{
+		this->text = text;
+		this->buttonStyle = buttonStyle;
 	}
 
 	void _OnHover() override
 	{
-		currentTextColor = onHoverTextColor;
+		buttonStyle.currentTextColor = buttonStyle.hoverTextColor;
 	}
 
 	void Render() override
@@ -183,14 +217,15 @@ public:
 		Box::Render();
 
 		int drawX = x;
-		if(XCenter)
-			drawX = x + width / 2 - (int)(charSize / 2 * text.length() * scale);
+		if(buttonStyle.XCenter)
+			drawX = x + width / 2 - (int)(charSize / 2 * text.length() * buttonStyle.textScale);
 		int drawY = y;
-		if (YCenter)
-			drawY = y + height / 2 - (charSize * scale) / 2;
+		if (buttonStyle.YCenter)
+			drawY = y + height / 2 - (charSize * buttonStyle.textScale) / 2;
 
-		engine->DrawString(drawX, drawY, text, currentTextColor,scale);
+		engine->DrawString(drawX, drawY, text, buttonStyle.currentTextColor, buttonStyle.textScale);
 
-		currentTextColor = defaultTextColor;
+		buttonStyle.currentTextColor = buttonStyle.defaultTextColor;
 	}
 };
+
