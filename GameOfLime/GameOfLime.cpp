@@ -41,6 +41,23 @@ public:
 	GameState GameState;
 
 public:
+	void genocide()
+	{
+		for (u_int x = 0; x <= grid.width; x++)
+			for (u_int y = 0; y <= grid.height; y++)
+			{
+				grid.setCell(x, y, GOL::EState::DEAD);
+			}
+		DrawAllLife();
+	}
+
+	void openHelpMenu()
+	{
+		SetPixelMode(olc::Pixel::Mode::ALPHA);
+		FillRect(0, 0, ScreenWidth(), ScreenHeight(), olc::Pixel(32, 64, 32, 127));
+		GameState = GameState::START;
+		SetPixelMode(olc::Pixel::Mode::NORMAL);
+	}
 
 	void DrawLife(u_int x, u_int y)
 	{
@@ -125,6 +142,39 @@ public:
 			DrawAllLife();
 		};
 
+		ButtonStyle inGameGuiStyle;
+		inGameGuiStyle.defaultTextColor = olc::YELLOW;
+		inGameGuiStyle.hoverTextColor = olc::WHITE;
+		inGameGuiStyle.textScale = 2;
+
+		inGameGuiStyle.boxStyle.defaultBackGroundColor = olc::DARK_GREEN;
+		inGameGuiStyle.boxStyle.defaultForeGroundColor = olc::GREY;
+
+		inGameGuiStyle.boxStyle.heldBackgroundColor = olc::VERY_DARK_MAGENTA;
+		inGameGuiStyle.boxStyle.heldForegroundColor = olc::GREY;
+		
+		{
+			Button* button = new Button(this, inGameGuiStyle, "Clear");
+			button->onRelease = [this](int mouse) -> void {genocide();};
+			inGameGui.push_back(button);
+		}
+		{
+			Button* button = new Button(this, inGameGuiStyle, "Help");
+			button->onRelease = [this](int mouse) -> void {openHelpMenu();};
+			inGameGui.push_back(button);
+		}
+
+		for (int i = 0; i < inGameGui.size(); i++)
+		{
+			Button* button = inGameGui[i];
+
+			button->width = 200;
+			button->height = 30;
+
+			button->y = ScreenHeight() - (5 * gridPixelSize) - (button->height/2);
+			button->x = button->width * i + (20 * i) + 20;
+		}
+
 		return true;
 	}
 	u_int ticks = 0;
@@ -148,8 +198,8 @@ public:
 			}
 			startButton->boxStyle.defaultBackGroundColor.g = (uint8_t)range_lerp(sin(ticks),-1,1,127,200);
 			startButton->boxStyle.hoverBackgroundColor = startButton->boxStyle.defaultBackGroundColor;
-			startButton->Poll();
 			startButton->Render();
+			startButton->Poll();
 
 			return true;
 			break;
@@ -182,10 +232,7 @@ public:
 			}
 			if (GetKey(olc::H).bReleased)
 			{
-				SetPixelMode(olc::Pixel::Mode::ALPHA);
-				FillRect(0, 0, ScreenWidth(), ScreenHeight(), olc::Pixel(32,64,32,127));
-				GameState = GameState::START;
-				SetPixelMode(olc::Pixel::Mode::NORMAL);
+				openHelpMenu();
 			}
 			if (GetKey(olc::W).bHeld)
 			{
@@ -219,12 +266,7 @@ public:
 			}
 			if (GetKey(olc::ESCAPE).bHeld)
 			{
-				for (u_int x = 0; x <= grid.width; x++)
-					for (u_int y = 0; y <= grid.height; y++)
-					{
-						grid.setCell(x, y, GOL::EState::DEAD);
-					}
-				DrawAllLife();
+				genocide();
 			}
 
 			if (GetKey(olc::UP).bHeld)
@@ -258,6 +300,13 @@ public:
 			}
 			lastMouseX = mouseGridPosX;
 			lastMouseY = mouseGridPosY;
+
+			for (u_int i = 0; i < inGameGui.size(); i++)
+			{
+				inGameGui[i]->Render();
+				inGameGui[i]->Poll();
+			}
+
 			break;
 		}
 
