@@ -79,6 +79,10 @@ public:
 			{
 				if (rand() % 5 == 0)
 					grid[x][y] = EState::ALIVE;
+				else
+				{
+					grid[x][y] = EState::DEAD;
+				}
 			}
 	}
 

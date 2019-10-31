@@ -163,6 +163,11 @@ public:
 			button->onRelease = [this](int mouse) -> void {openHelpMenu();};
 			inGameGui.push_back(button);
 		}
+		{
+			Button* button = new Button(this, inGameGuiStyle, "Repopulate");
+			button->onRelease = [this](int mouse) -> void {grid.randomFill(); DrawAllLife(); };
+			inGameGui.push_back(button);
+		}
 
 		for (int i = 0; i < inGameGui.size(); i++)
 		{
@@ -180,6 +185,7 @@ public:
 	u_int ticks = 0;
 	bool OnUserUpdate(float fElapsedTime) override
 	{
+		
 		sAppName = "Game Of Lime - FPS " + std::to_string(nFrameCount) + " : " + std::to_string(fps);
 
 		if(fps != Fps::UNCAPPED)
@@ -219,16 +225,19 @@ public:
 			}
 
 			FillRect(mouseGridPosX*gridPixelSize,mouseGridPosY*gridPixelSize,gridPixelSize,gridPixelSize, olc::GREY);
-			if (GetMouse(0).bPressed || GetKey(olc::SPACE).bHeld)
+			if (GetMouseY() < ScreenHeight() - (10 * gridPixelSize))
 			{
-				if(ticks%5 == 0 || GetMouse(0).bPressed)
-					grid.step([this](u_int x, u_int y) -> void {DrawLife(x, y); });
-			}
-			if (GetMouse(1).bHeld)
-			{
-				grid.setCell(mouseGridPosX, mouseGridPosY, GOL::EState::ALIVE);
-				DrawAllLife();
+				if (GetMouse(0).bPressed || GetKey(olc::SPACE).bHeld)
+				{
+					if (ticks % 5 == 0 || GetMouse(0).bPressed)
+						grid.step([this](u_int x, u_int y) -> void {DrawLife(x, y); });
+				}
+				if (GetMouse(1).bHeld)
+				{
+					grid.setCell(mouseGridPosX, mouseGridPosY, GOL::EState::ALIVE);
+					DrawAllLife();
 
+				}
 			}
 			if (GetKey(olc::H).bReleased)
 			{
