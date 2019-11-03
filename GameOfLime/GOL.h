@@ -193,7 +193,7 @@ public:
 						u_int new_x = x + rand() % 3 - 1;// -1 to 1
 						u_int new_y = y + rand() % 3 - 1;// -1 to 1
 
-						if(new_x >= 0 && new_y >= 0 && new_x < newGrid.size() && new_y < newGrid[new_x].size())
+						if(new_x >= 0 && new_y >= 0 && new_x < newGrid.size() && new_y < newGrid[new_x].size() && grid[new_x][new_y] != EState::WALL)
 							newGrid[new_x][new_y] = grid[x][y] == EState::CREEP_ONE ? EState::CREEP_ONE : EState::CREEP_TWO;
 					}
 				}
