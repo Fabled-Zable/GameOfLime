@@ -61,9 +61,9 @@ public:
 		for(u_int x = 0; x < grid.size(); x++)
 			for (u_int y = 0; y < grid[x].size(); y++)
 			{
-				int newX = x + shift_x;
-				int newY = y + shift_y;
-				if (newX >= 0 && newX < grid.size() && newY >= 0 && newY < grid[x].size())
+				long int newX = x + shift_x;
+				long int newY = y + shift_y;
+				if (newX >= 0 && newX < (long int)grid.size() && newY >= 0 && newY < (long int)grid[x].size())
 				{
 					newGrid[newX][newY] = grid[x][y];
 				}

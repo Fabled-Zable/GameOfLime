@@ -99,6 +99,7 @@ public:
 	std::vector<Button*> infoBoxes;
 	std::vector<Button*> inGameGui;
 	Button* startButton;
+	CheckBox* autoStep;
 
 	bool OnUserCreate() override
 	{
@@ -169,7 +170,9 @@ public:
 			inGameGui.push_back(button);
 		}
 
-		for (int i = 0; i < inGameGui.size(); i++)
+		int lastButtonX = 0;
+
+		for (u_int i = 0; i < inGameGui.size(); i++)
 		{
 			Button* button = inGameGui[i];
 
@@ -178,7 +181,18 @@ public:
 
 			button->y = ScreenHeight() - (5 * gridPixelSize) - (button->height/2);
 			button->x = button->width * i + (20 * i) + 20;
+			lastButtonX = button->x + button->width;
 		}
+
+		BoxStyle autoStepStyle;
+		autoStepStyle.defaultForeGroundColor = olc::WHITE;
+		autoStepStyle.defaultBackGroundColor = olc::GREEN;
+		autoStepStyle.hoverBackgroundColor = autoStepStyle.defaultBackGroundColor;
+		autoStepStyle.hoverForeGroundColor = autoStepStyle.defaultForeGroundColor;
+		autoStepStyle.heldForegroundColor = autoStepStyle.defaultForeGroundColor;
+		autoStepStyle.heldBackgroundColor = autoStepStyle.defaultBackGroundColor;
+
+		autoStep = new CheckBox(this, autoStepStyle, true, 20 + lastButtonX, ScreenHeight() - (5 * gridPixelSize) - 15, 30, 30);
 
 		return true;
 	}
@@ -215,7 +229,10 @@ public:
 			break;
 
 		case GameState::RUNNING:
-			fps = Fps::FULL;
+			if (IsFocused())
+				fps = Fps::FULL;
+			else
+				fps = Fps::PARTIAL;
 			int mouseGridPosX = GetMouseX()/gridPixelSize;
 			int mouseGridPosY = GetMouseY()/gridPixelSize;
 
@@ -225,9 +242,9 @@ public:
 			}
 
 			FillRect(mouseGridPosX*gridPixelSize,mouseGridPosY*gridPixelSize,gridPixelSize,gridPixelSize, olc::GREY);
-			if (GetMouseY() < ScreenHeight() - (10 * gridPixelSize))
+			if (GetMouseY() < ScreenHeight() - (10 * gridPixelSize) || autoStep->checked)
 			{
-				if (GetMouse(0).bPressed || GetKey(olc::SPACE).bHeld)
+				if (GetMouse(0).bPressed || GetKey(olc::SPACE).bHeld || autoStep->checked)
 				{
 					if (ticks % 5 == 0 || GetMouse(0).bPressed)
 						grid.step([this](u_int x, u_int y) -> void {DrawLife(x, y); });
@@ -316,6 +333,8 @@ public:
 				inGameGui[i]->Poll();
 			}
 
+			autoStep->Render();
+			autoStep->Poll();
 			break;
 		}
 
@@ -326,7 +345,7 @@ public:
 class Test : public olc::PixelGameEngine
 {
 public:
-	Button* button;
+	CheckBox* checkBox;
 
 	Test()
 	{
@@ -335,22 +354,30 @@ public:
 
 	bool OnUserCreate() override
 	{
-		button = new Button(this,"Hello World!",1,ScreenWidth()/2 - 100,ScreenHeight()/2-100,200,100,olc::WHITE,olc::WHITE,olc::DARK_GREEN);
-		button->boxStyle.hoverBackgroundColor = olc::BLUE;
-		button->boxStyle.heldBackgroundColor = olc::DARK_BLUE;
-		button->boxStyle.borderThickness = 1;
+		BoxStyle boxStyle;
+		boxStyle.defaultForeGroundColor = olc::WHITE;
+		boxStyle.defaultBackGroundColor = olc::GREEN;
+		boxStyle.hoverBackgroundColor = boxStyle.defaultBackGroundColor;
+		boxStyle.hoverForeGroundColor = boxStyle.defaultForeGroundColor;
+		boxStyle.heldForegroundColor = boxStyle.defaultForeGroundColor;
+		boxStyle.heldBackgroundColor = boxStyle.defaultBackGroundColor;
 
+		checkBox = new CheckBox(this, boxStyle,true,20,20,200,200);
 		return true;
 
 	}
 
 	bool OnUserUpdate(float fElapsedTime) override
 	{
-		FillRect(0, 0, ScreenWidth(), ScreenHeight(),olc::VERY_DARK_MAGENTA);
-		Draw(GetMouseX(), GetMouseY());
+		sAppName = "Testing stuff - " + std::to_string(nFrameCount);
 
-		//button->Poll();
-		//button->Render();
+		FillRect(0, 0, ScreenWidth(), ScreenHeight(),olc::VERY_DARK_MAGENTA);
+		checkBox->Render();
+		checkBox->Poll();
+
+		
+
+
 		return true;
 	}
 };
@@ -360,7 +387,11 @@ int main()
 {
 	Game game;
 	if (game.Construct(1280, 720, 1, 1))
-		game.Start();;
+		game.Start();
+
+	//Test test;
+	//if (test.Construct(1280, 720, 1, 1))
+	//	test.Start();
 
 	return 0;
 }

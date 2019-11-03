@@ -170,15 +170,25 @@ public:
 
 	virtual void Render()
 	{ 
-		if(boxStyle.fill)
-			engine->FillRect(x, y, width, height, boxStyle.currentBackGroundColor);
+		renderFill();
 
-		if(boxStyle.border)
-			for (int i = boxStyle.borderThickness; i != 0; i += i < 0 ? 1 : -1)
-				engine->DrawRect(x - i + 1, y - i + 1, width + i*2 - 2, height, boxStyle.currentForeGroundColor);//trial and error ftw
+		renderBorder();
 
 		boxStyle.currentBackGroundColor = boxStyle.defaultBackGroundColor;
 		boxStyle.currentForeGroundColor = boxStyle.defaultForeGroundColor;
+	}
+
+private:
+	virtual void renderFill()
+	{
+		if (boxStyle.fill)
+			engine->FillRect(x, y, width, height, boxStyle.currentBackGroundColor);
+	}
+	virtual void renderBorder()
+	{
+		if (boxStyle.border)
+			for (int i = boxStyle.borderThickness; i != 0; i += i < 0 ? 1 : -1)
+				engine->DrawRect(x - i + 1, y - i + 1, width + i * 2 - 2, height, boxStyle.currentForeGroundColor);//trial and error ftw
 	}
 };
 
@@ -227,5 +237,33 @@ public:
 
 		buttonStyle.currentTextColor = buttonStyle.defaultTextColor;
 	}
+};
+
+class CheckBox : public Box
+{
+public:
+	bool checked = true;
+	int innerWidth = 4;
+	int innerHeight = 4;
+	olc::Pixel unCheckedColor = olc::BLACK;
+
+	CheckBox(olc::PixelGameEngine* engine, BoxStyle boxStyle, bool checked = true, int x = 0, int y = 0, int width = 0, int height = 0)
+		: Box(engine, boxStyle,x,y,width,height) 
+	{
+		this->checked = checked;
+	}
+
+	void renderFill() override
+	{
+		if (boxStyle.fill)
+			engine->FillRect(x + innerWidth, y + innerHeight, width - innerWidth * 2, height - innerHeight * 2, checked ? boxStyle.currentBackGroundColor : unCheckedColor);
+	}
+
+	void _OnPress(int mouse) override
+	{
+		AllocConsole();
+		checked = !checked;
+	}
+
 };
 
