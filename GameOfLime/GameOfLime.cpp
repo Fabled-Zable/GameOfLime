@@ -157,16 +157,41 @@ public:
 		{
 			Button* button = new Button(this, inGameGuiStyle, "Clear");
 			button->onRelease = [this](int mouse) -> void {genocide();};
+
+			button->width = 200;
+			button->height = 30;
+
 			inGameGui.push_back(button);
 		}
 		{
 			Button* button = new Button(this, inGameGuiStyle, "Help");
 			button->onRelease = [this](int mouse) -> void {openHelpMenu();};
+
+			button->width = 200;
+			button->height = 30;
+
 			inGameGui.push_back(button);
 		}
 		{
 			Button* button = new Button(this, inGameGuiStyle, "Repopulate");
 			button->onRelease = [this](int mouse) -> void {grid.randomFill(); DrawAllLife(); };
+
+			button->width = 200;
+			button->height = 30;
+
+			inGameGui.push_back(button);
+		}
+		{
+			ButtonStyle autoStepInfo;
+			autoStepInfo.hoverTextColor = olc::YELLOW;
+			autoStepInfo.defaultTextColor = olc::YELLOW;
+			autoStepInfo.boxStyle.fill = false;
+			autoStepInfo.boxStyle.border = false;
+			Button* button = new Button(this, autoStepInfo, "Auto Step:");
+
+			button->width = 100;
+			button->height = 30;
+
 			inGameGui.push_back(button);
 		}
 
@@ -176,11 +201,14 @@ public:
 		{
 			Button* button = inGameGui[i];
 
-			button->width = 200;
-			button->height = 30;
+			int lastWidth = 0;
+			if (i != 0)
+			{
+				lastWidth = inGameGui[i - 1]->width;
+			}
 
 			button->y = ScreenHeight() - (5 * gridPixelSize) - (button->height/2);
-			button->x = button->width * i + (20 * i) + 20;
+			button->x = lastWidth * i + (20 * i) + 20;
 			lastButtonX = button->x + button->width;
 		}
 
@@ -332,7 +360,6 @@ public:
 				inGameGui[i]->Render();
 				inGameGui[i]->Poll();
 			}
-
 			autoStep->Render();
 			autoStep->Poll();
 			break;

@@ -261,7 +261,6 @@ public:
 
 	void _OnPress(int mouse) override
 	{
-		AllocConsole();
 		checked = !checked;
 	}
 
