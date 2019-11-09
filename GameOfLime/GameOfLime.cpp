@@ -12,7 +12,8 @@ double range_lerp(double value, double min1, double max1, double min2, double ma
 
 class Game : public olc::PixelGameEngine
 {
-	const int gridPixelSize = 10;
+	u_int gridPixelSize = 10;
+	u_int simSpeed = 25;
 public:
 	enum class GameState
 	{
@@ -99,6 +100,8 @@ public:
 	std::vector<Button*> infoBoxes;
 	std::vector<Button*> inGameGui;
 	Button* startButton;
+	Button* inGameGuiBorder;
+	Button* simSpeedText;
 	CheckBox* autoStep;
 
 	bool OnUserCreate() override
@@ -117,6 +120,19 @@ public:
 		infoBoxStyle.defaultTextColor = olc::YELLOW;
 		infoBoxStyle.boxStyle.defaultForeGroundColor = olc::GREY;
 		infoBoxStyle.boxStyle.defaultBackGroundColor = olc::BLACK;
+
+
+		inGameGuiBorder = new Button(this,infoBoxStyle);
+
+		int thicc = inGameGuiBorder->boxStyle.borderThickness;
+
+		inGameGuiBorder->width = ScreenWidth() - thicc *2;
+		inGameGuiBorder->x = thicc;
+		inGameGuiBorder->y = ScreenHeight() - (10 * gridPixelSize) + thicc;
+		inGameGuiBorder->height = ScreenHeight() - inGameGuiBorder->y - thicc;
+		inGameGuiBorder->boxStyle.fill = false;
+
+
 
 
 		for (u_int i = 0; i < infos.size(); i++)
@@ -182,6 +198,18 @@ public:
 			inGameGui.push_back(button);
 		}
 		{
+			ButtonStyle simSpeedITextStyle;
+			simSpeedITextStyle.hoverTextColor = olc::YELLOW;
+			simSpeedITextStyle.defaultTextColor = olc::YELLOW;
+			simSpeedITextStyle.boxStyle.border = false;
+			simSpeedText = new Button(this, simSpeedITextStyle, "Sim Speed: 75%");
+
+			simSpeedText->width = 190;
+			simSpeedText->height = 30;
+
+			inGameGui.push_back(simSpeedText);
+		}
+		{
 			ButtonStyle autoStepInfo;
 			autoStepInfo.hoverTextColor = olc::YELLOW;
 			autoStepInfo.defaultTextColor = olc::YELLOW;
@@ -194,6 +222,7 @@ public:
 
 			inGameGui.push_back(button);
 		}
+
 
 		int lastButtonX = 0;
 
@@ -269,12 +298,15 @@ public:
 				DrawLife(lastMouseX, lastMouseY);
 			}
 
-			FillRect(mouseGridPosX*gridPixelSize,mouseGridPosY*gridPixelSize,gridPixelSize,gridPixelSize, olc::GREY);
-			if (GetMouseY() < ScreenHeight() - (10 * gridPixelSize) || autoStep->checked)
+			bool mouseInPlay = GetMouseY() < ScreenHeight() - (10 * gridPixelSize);
+
+			if(mouseInPlay)
+				FillRect(mouseGridPosX*gridPixelSize,mouseGridPosY*gridPixelSize,gridPixelSize,gridPixelSize, olc::GREY);
+			if (mouseInPlay || autoStep->checked)
 			{
-				if (GetMouse(0).bPressed || GetKey(olc::SPACE).bHeld || autoStep->checked)
+				if (GetMouse(0).bPressed || autoStep->checked)
 				{
-					if (ticks % 5 == 0 || GetMouse(0).bPressed)
+					if (simSpeed == 1 || ticks % (int)( simSpeed/100.0f * fps) == 0 || GetMouse(0).bPressed)
 						grid.step([this](u_int x, u_int y) -> void {DrawLife(x, y); });
 				}
 				if (GetMouse(1).bHeld)
@@ -284,6 +316,40 @@ public:
 
 				}
 			}
+
+			if (GetKey(olc::SHIFT).bHeld)
+			{
+				if (GetKey(olc::NP_SUB).bPressed)
+				{
+					/*gridPixelSize++;
+					grid = GOL(ScreenWidth() / gridPixelSize, ScreenHeight() / gridPixelSize - 10);
+					DrawAllLife();*/
+
+					if (simSpeed == 1) simSpeed--;
+					simSpeed+= 5;
+					if (simSpeed > 100) simSpeed = 100;
+				}
+				if (GetKey(olc::NP_ADD).bPressed)
+				{
+					if (gridPixelSize > 1)
+					{
+						/*gridPixelSize--;
+						grid = GOL(ScreenWidth() / gridPixelSize, ScreenHeight() / gridPixelSize - 10);
+
+						DrawAllLife();*/
+						simSpeed-= 5;
+						if (simSpeed == 0 || simSpeed > 105) simSpeed = 1;//because it's unsigned
+					}
+				}
+
+				simSpeedText->text = "Sim-Speed: " + (simSpeed == 1 ? "100" : simSpeed == 100 ? "1" : std::to_string(100 - simSpeed)) + "%";
+			}
+
+			if (GetKey(olc::SPACE).bPressed)
+			{
+				autoStep->checked = !autoStep->checked;
+			}
+
 			if (GetKey(olc::H).bReleased)
 			{
 				openHelpMenu();
@@ -360,8 +426,10 @@ public:
 				inGameGui[i]->Render();
 				inGameGui[i]->Poll();
 			}
+
 			autoStep->Render();
 			autoStep->Poll();
+			inGameGuiBorder->Render();
 			break;
 		}
 
@@ -398,9 +466,9 @@ public:
 	{
 		sAppName = "Testing stuff - " + std::to_string(nFrameCount);
 
-		FillRect(0, 0, ScreenWidth(), ScreenHeight(),olc::VERY_DARK_MAGENTA);
-		checkBox->Render();
-		checkBox->Poll();
+		//FillRect(0, 0, ScreenWidth(), ScreenHeight(),olc::VERY_DARK_MAGENTA);
+		//checkBox->Render();
+		//checkBox->Poll();
 
 		
 
